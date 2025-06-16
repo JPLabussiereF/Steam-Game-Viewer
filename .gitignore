@@ -2,7 +2,7 @@
 # INFORMAÇÕES SENSÍVEIS
 # ================================
 # Arquivos de configuração com informações sensíveis
-application-local.properties
+src/main/resources/application-local.properties
 application-dev.properties
 application-prod.properties
 *.env
