@@ -76,51 +76,82 @@ class SteamAPI {
      * @param {string} sortBy - Critério de ordenação ('name' ou 'playtime')
      * @returns {Promise<Array>} - Lista de jogos
      */
-    static async getUserGames(steamId, sortBy = 'playtime') {
-        try {
-            // Validar parâmetros
-            if (!steamId || typeof steamId !== 'string') {
-                throw new Error('Steam ID é obrigatório e deve ser uma string');
-            }
-
-            if (!['name', 'playtime'].includes(sortBy)) {
-                throw new Error('sortBy deve ser "name" ou "playtime"');
-            }
-
-            // Construir URL
-            const url = `${API_CONFIG.BASE_URL}/${encodeURIComponent(steamId)}?sortBy=${encodeURIComponent(sortBy)}`;
-
-            console.log('🔍 Buscando jogos:', { steamId, sortBy, url });
-
-            // Fazer requisição
-            const response = await fetch(url, {
-                method: 'GET',
-                headers: API_CONFIG.HEADERS,
-                signal: AbortSignal.timeout(API_CONFIG.TIMEOUT)
-            });
-
-            // Verificar resposta
-            if (!response.ok) {
-                const errorMessage = await this.handleErrorResponse(response);
-                throw new Error(errorMessage);
-            }
-
-            const games = await response.json();
-
-            console.log('🎮 Jogos encontrados:', games.length);
-
-            // Validar estrutura dos dados
-            if (!Array.isArray(games)) {
-                throw new Error('Resposta da API inválida: esperado array de jogos');
-            }
-
-            return games;
-
-        } catch (error) {
-            console.error('❌ Erro ao buscar jogos:', error);
-            throw error;
+static async getUserGames(steamId, sortBy = 'playtime') {
+    try {
+        // Validar parâmetros
+        if (!steamId || typeof steamId !== 'string') {
+            throw new Error('Steam ID é obrigatório e deve ser uma string');
         }
+
+        if (!['name', 'playtime'].includes(sortBy)) {
+            throw new Error('sortBy deve ser "name" ou "playtime"');
+        }
+
+        // Construir URL
+        const url = `${API_CONFIG.BASE_URL}/${encodeURIComponent(steamId)}?sortBy=${encodeURIComponent(sortBy)}`;
+
+        console.log('🔍 Buscando jogos:', { steamId, sortBy, url });
+
+        // Fazer requisição
+        const response = await fetch(url, {
+            method: 'GET',
+            headers: API_CONFIG.HEADERS,
+            signal: AbortSignal.timeout(API_CONFIG.TIMEOUT)
+        });
+
+        // Verificar resposta
+        if (!response.ok) {
+            const errorMessage = await this.handleErrorResponse(response);
+            throw new Error(errorMessage);
+        }
+
+        const games = await response.json();
+
+        // DEBUG: Log da resposta completa
+        console.log('📥 Resposta da API (primeiros 2 jogos):', games.slice(0, 2));
+
+        // DEBUG: Verificar estrutura dos dados
+        if (games.length > 0) {
+            const firstGame = games[0];
+            console.log('🔍 Estrutura do primeiro jogo:', {
+                keys: Object.keys(firstGame),
+                playtimeForever: firstGame.playtimeForever,
+                playtimeForeverType: typeof firstGame.playtimeForever,
+                appId: firstGame.appId || firstGame.app_id,
+                name: firstGame.name
+            });
+        }
+
+        console.log('🎮 Jogos encontrados:', games.length);
+
+        // Validar estrutura dos dados
+        if (!Array.isArray(games)) {
+            throw new Error('Resposta da API inválida: esperado array de jogos');
+        }
+
+        // CORREÇÃO: Normalizar os dados se necessário
+        const normalizedGames = games.map(game => {
+            // Se a API retorna snake_case, converter para camelCase
+            if (game.app_id && !game.appId) {
+                return {
+                    appId: game.app_id,
+                    name: game.name,
+                    playtimeForever: game.playtime_forever || 0,
+                    imgIconUrl: game.img_icon_url || ''
+                };
+            }
+            return game;
+        });
+
+        console.log('🔄 Dados normalizados (primeiro jogo):', normalizedGames[0]);
+
+        return normalizedGames;
+
+    } catch (error) {
+        console.error('❌ Erro ao buscar jogos:', error);
+        throw error;
     }
+}
 
     /**
      * Trata erros de resposta HTTP e retorna mensagem apropriada

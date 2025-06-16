@@ -299,64 +299,72 @@ class SteamGameViewer {
         this.showResults();
     }
 
-    /**
-     * Cria um card para um jogo
-     */
-    createGameCard(game, stats) {
-        const card = document.createElement('div');
-        card.className = 'game-card';
+/**
+ * Cria um card para um jogo - VERSÃO CORRIGIDA
+ */
+createGameCard(game, stats) {
+    const card = document.createElement('div');
+    card.className = 'game-card';
 
-        // DEBUG: Log para verificar os dados
-        console.log('🎮 Debug game:', game.name, 'playtime:', game.playtimeForever, 'type:', typeof game.playtimeForever);
+    // DEBUG: Log para verificar os dados recebidos
+    console.log('🎮 Debug game data:', {
+        name: game.name,
+        playtimeForever: game.playtimeForever,
+        type: typeof game.playtimeForever,
+        rawData: game
+    });
 
-        // Garantir que playtimeForever é um número válido
-        const playtime = Number(game.playtimeForever) || 0;
-        const hours = Math.round(playtime / 60 * 10) / 10;
-        const hoursText = this.formatPlaytime(playtime);
+    // CORREÇÃO: Usar playtimeForever diretamente, não playtime_forever
+    const playtime = Number(game.playtimeForever) || 0;
+    const hoursText = this.formatPlaytime(playtime);
 
-        console.log('⏰ Playtime processado:', { playtime, hours, hoursText });
+    console.log('⏰ Playtime processado:', {
+        original: game.playtimeForever,
+        converted: playtime,
+        formatted: hoursText
+    });
 
-        // Calcular porcentagem para a barra de progresso
-        const maxPlaytime = stats.mostPlayedGame ?
-            Number(stats.mostPlayedGame.playtimeForever) || 1 : 100;
-        const progressPercent = maxPlaytime > 0 ?
-            Math.min((playtime / maxPlaytime) * 100, 100) : 0;
+    // Calcular porcentagem para a barra de progresso
+    const maxPlaytime = stats.mostPlayedGame ?
+        Number(stats.mostPlayedGame.playtimeForever) || 1 : 100;
+    const progressPercent = maxPlaytime > 0 ?
+        Math.min((playtime / maxPlaytime) * 100, 100) : 0;
 
-        card.innerHTML = `
-            <div class="game-header">
-                <div class="game-icon-wrapper">
-                    ${this.createGameIcon(game)}
-                </div>
-                <div class="game-info">
-                    <h3 title="${this.escapeHtml(game.name)}">${this.truncateText(game.name, 50)}</h3>
-                    <div class="game-id">ID: ${game.appId}</div>
-                </div>
+    card.innerHTML = `
+        <div class="game-header">
+            <div class="game-icon-wrapper">
+                ${this.createGameIcon(game)}
             </div>
-
-            <div class="game-stats">
-                <div class="playtime">
-                    <i class="fas fa-clock"></i>
-                    <span class="playtime-badge">${hoursText}</span>
-                </div>
-                ${playtime > 0 ? `
-                    <div class="playtime-bar">
-                        <div class="playtime-fill" style="width: 0%" data-target="${progressPercent}"></div>
-                    </div>
-                ` : ''}
+            <div class="game-info">
+                <h3 title="${this.escapeHtml(game.name)}">${this.truncateText(game.name, 50)}</h3>
+                <div class="game-id">ID: ${game.appId}</div>
             </div>
-        `;
+        </div>
 
-        // Animar barra de progresso
-        setTimeout(() => {
-            const progressBar = card.querySelector('.playtime-fill');
-            if (progressBar) {
-                const targetWidth = progressBar.getAttribute('data-target');
-                progressBar.style.width = targetWidth + '%';
-            }
-        }, 500);
+        <div class="game-stats">
+            <div class="playtime">
+                <i class="fas fa-clock"></i>
+                <span class="playtime-badge">${hoursText}</span>
+            </div>
+            ${playtime > 0 ? `
+                <div class="playtime-bar">
+                    <div class="playtime-fill" style="width: 0%" data-target="${progressPercent}"></div>
+                </div>
+            ` : ''}
+        </div>
+    `;
 
-        return card;
-    }
+    // Animar barra de progresso
+    setTimeout(() => {
+        const progressBar = card.querySelector('.playtime-fill');
+        if (progressBar) {
+            const targetWidth = progressBar.getAttribute('data-target');
+            progressBar.style.width = targetWidth + '%';
+        }
+    }, 500);
+
+    return card;
+}
 
     /**
      * Cria o ícone do jogo
@@ -412,40 +420,46 @@ class SteamGameViewer {
             return 'fas fa-gamepad';
         }
     }
+/**
+ * Formata tempo de jogo - VERSÃO CORRIGIDA
+ * @param {number|string} minutes - Minutos de jogo
+ * @returns {string} - Tempo formatado
+ */
+formatPlaytime(minutes) {
+    // Log para debug
+    console.log('🔧 formatPlaytime input:', minutes, 'type:', typeof minutes);
 
-    /**
-     * Formata tempo de jogo - VERSÃO CORRIGIDA
-     */
-    formatPlaytime(minutes) {
-        // Debug log
-        console.log('🔧 formatPlaytime input:', minutes, 'type:', typeof minutes);
-
-        // Converter para número se não for
-        const numMinutes = Number(minutes);
-
-        // Verificar se é um número válido
-        if (isNaN(numMinutes)) {
-            console.log('❌ formatPlaytime: NaN detectado');
-            return 'Tempo inválido';
-        }
-
-        // Se for exatamente zero, nunca foi jogado
-        if (numMinutes === 0) {
-            console.log('⚪ formatPlaytime: 0 minutos = Nunca jogado');
-            return 'Nunca jogado';
-        }
-
-        // Se for menor que 60 minutos, mostrar em minutos
-        if (numMinutes > 0 && numMinutes < 60) {
-            console.log('⏱️ formatPlaytime: menos de 1 hora =', numMinutes + 'min');
-            return `${numMinutes}min`;
-        }
-
-        // Converter para horas com uma casa decimal
-        const hours = Math.round(numMinutes / 60 * 10) / 10;
-        console.log('⏰ formatPlaytime: conversão para horas =', hours + 'h');
-        return `${hours}h`;
+    // Converter para número se for string
+    let numMinutes;
+    if (typeof minutes === 'string') {
+        numMinutes = parseInt(minutes, 10);
+    } else {
+        numMinutes = Number(minutes);
     }
+
+    // Verificar se é um número válido
+    if (isNaN(numMinutes) || numMinutes < 0) {
+        console.log('❌ formatPlaytime: valor inválido:', minutes);
+        return 'Tempo inválido';
+    }
+
+    // Se for exatamente zero, nunca foi jogado
+    if (numMinutes === 0) {
+        console.log('⚪ formatPlaytime: 0 minutos = Nunca jogado');
+        return 'Nunca jogado';
+    }
+
+    // Se for menor que 60 minutos, mostrar em minutos
+    if (numMinutes > 0 && numMinutes < 60) {
+        console.log('⏱️ formatPlaytime: menos de 1 hora =', numMinutes + 'min');
+        return `${numMinutes}min`;
+    }
+
+    // Converter para horas com uma casa decimal
+    const hours = Math.round(numMinutes / 60 * 10) / 10;
+    console.log('⏰ formatPlaytime: conversão para horas =', hours + 'h');
+    return `${hours}h`;
+}
 
     /**
      * Validação visual do Steam ID
