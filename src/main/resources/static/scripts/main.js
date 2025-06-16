@@ -366,19 +366,23 @@ createGameCard(game, stats) {
     return card;
 }
 
-    /**
-     * Cria o ícone do jogo
-     */
-    createGameIcon(game) {
-        // Verificar se tem URL de imagem válida
-        if (game.imgIconUrl && game.imgIconUrl.trim() && !game.imgIconUrl.includes('undefined')) {
-            return `<img src="${game.imgIconUrl}" alt="${this.escapeHtml(game.name)}" class="game-icon" onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\\"game-icon no-image\\"><i class=\\"fas fa-gamepad\\"></i></div>'">`;
-        } else {
-            // Se não tem imagem, usar ícone baseado no tipo de jogo
-            const gameIcon = this.getGameIcon(game.name);
-            return `<div class="game-icon no-image"><i class="${gameIcon}"></i></div>`;
-        }
+/**
+ * Cria o ícone do jogo - VERSÃO CORRIGIDA SEM ONERROR
+ */
+createGameIcon(game) {
+    // Verificar se tem URL de imagem válida
+    if (game.imgIconUrl &&
+        game.imgIconUrl.trim() &&
+        !game.imgIconUrl.includes('undefined') &&
+        game.imgIconUrl.startsWith('http')) {
+
+        return `<img src="${game.imgIconUrl}" alt="${this.escapeHtml(game.name)}" class="game-icon">`;
+    } else {
+        // Se não tem imagem, usar ícone baseado no tipo de jogo
+        const gameIcon = this.getGameIcon(game.name);
+        return `<div class="game-icon no-image"><i class="${gameIcon}"></i></div>`;
     }
+}
 
     /**
      * Retorna ícone apropriado baseado no nome do jogo

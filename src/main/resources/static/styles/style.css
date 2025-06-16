@@ -567,6 +567,46 @@ input[type="text"]::placeholder {
     50% { transform: scale(1.1); }
 }
 
+/* ===== CORREÇÃO PARA IMAGENS QUEBRADAS ===== */
+.game-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 8px;
+    object-fit: cover;
+    border: 2px solid var(--bg-input);
+    background: var(--bg-input); /* Fallback para imagens quebradas */
+}
+
+/* Tratar imagens que não carregam */
+.game-icon:not([src]),
+.game-icon[src=""],
+.game-icon[src*="undefined"] {
+    display: none;
+}
+
+.game-icon-wrapper {
+    position: relative;
+    width: 50px;
+    height: 50px;
+}
+
+/* Fallback quando imagem não carrega */
+.game-icon[src=""]:after,
+.game-icon:not([src]):after {
+    content: "🎮";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, var(--primary-purple), var(--accent-purple));
+    border-radius: 8px;
+    font-size: 1.5rem;
+}
+
 /* ===== RESPONSIVE ===== */
 @media (max-width: 768px) {
     .container {
