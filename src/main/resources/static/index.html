@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Steam Game Viewer 🎮</title>
+    <link rel="stylesheet" href="styles/style.css">
+    <!-- Font Awesome para ícones -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+<!-- Header -->
+<header class="header">
+    <div class="container">
+        <h1 class="logo">
+            <i class="fas fa-gamepad"></i>
+            Steam Game Viewer
+        </h1>
+        <p class="subtitle">Visualize sua biblioteca de jogos Steam</p>
+    </div>
+</header>
+
+<!-- Main Content -->
+<main class="main">
+    <div class="container">
+        <!-- Search Section -->
+        <section class="search-section">
+            <div class="search-card">
+                <h2>
+                    <i class="fas fa-search"></i>
+                    Buscar Biblioteca Steam
+                </h2>
+
+                <form id="searchForm" class="search-form">
+                    <div class="input-group">
+                        <label for="steamId">Steam ID</label>
+                        <div class="input-wrapper">
+                            <i class="fas fa-user input-icon"></i>
+                            <input
+                                    type="text"
+                                    id="steamId"
+                                    placeholder="Ex: 76561198010872093"
+                                    required
+                                    autocomplete="off"
+                            >
+                            <button type="button" id="helpBtn" class="help-btn" title="Como encontrar meu Steam ID?">
+                                <i class="fas fa-question-circle"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="sortBy">Ordenar por</label>
+                        <div class="select-wrapper">
+                            <i class="fas fa-sort input-icon"></i>
+                            <select id="sortBy">
+                                <option value="playtime">Horas Jogadas</option>
+                                <option value="name">Nome do Jogo</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <button type="submit" id="searchBtn" class="search-btn">
+                        <i class="fas fa-search"></i>
+                        <span>Buscar Jogos</span>
+                        <div class="loading-spinner"></div>
+                    </button>
+                </form>
+
+                <!-- Help Modal -->
+                <div id="helpModal" class="modal">
+                    <div class="modal-content">
+                        <span class="close">&times;</span>
+                        <h3><i class="fas fa-info-circle"></i> Como encontrar seu Steam ID?</h3>
+                        <div class="help-content">
+                            <div class="help-step">
+                                <div class="step-number">1</div>
+                                <div class="step-text">
+                                    <strong>Visite:</strong>
+                                    <a href="https://steamid.io/" target="_blank">steamid.io <i class="fas fa-external-link-alt"></i></a>
+                                </div>
+                            </div>
+                            <div class="help-step">
+                                <div class="step-number">2</div>
+                                <div class="step-text">
+                                    <strong>Digite</strong> seu nome de usuário Steam ou URL do perfil
+                                </div>
+                            </div>
+                            <div class="help-step">
+                                <div class="step-number">3</div>
+                                <div class="step-text">
+                                    <strong>Copie</strong> o "SteamID64" (número com 17 dígitos)
+                                </div>
+                            </div>
+                            <div class="help-note">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                <strong>Importante:</strong> Seu perfil Steam deve estar público para visualizar os jogos!
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Message Section -->
+        <section id="messageSection" class="message-section"></section>
+
+        <!-- Results Section -->
+        <section id="resultsSection" class="results-section" style="display: none;">
+            <div class="results-header">
+                <h2 id="resultsTitle">
+                    <i class="fas fa-trophy"></i>
+                    Biblioteca de Jogos
+                </h2>
+                <div class="results-stats">
+                    <span id="gameCount" class="game-count">0 jogos encontrados</span>
+                    <span id="totalHours" class="total-hours">0h total</span>
+                </div>
+            </div>
+
+            <div id="gamesList" class="games-grid"></div>
+        </section>
+    </div>
+</main>
+
+<!-- Footer -->
+<footer class="footer">
+    <div class="container">
+        <p>
+            <i class="fas fa-code"></i>
+            Desenvolvido com Spring Boot + HTML/CSS/JS
+            <i class="fas fa-heart"></i>
+        </p>
+    </div>
+</footer>
+
+<!-- Carregar scripts na ordem correta -->
+<script src="scripts/api.js"></script>
+<script src="scripts/main.js"></script>
+</body>
+</html>
