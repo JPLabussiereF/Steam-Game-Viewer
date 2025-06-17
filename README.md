@@ -7,17 +7,29 @@
 ![CSS3](https://img.shields.io/badge/CSS3-1572B6?logo=css3&logoColor=white)
 ![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?logo=javascript&logoColor=black)
 
-Uma aplicação web moderna para visualizar bibliotecas de jogos Steam. Desenvolvida com Spring Boot no backend e HTML/CSS/JavaScript no frontend, oferece uma interface elegante e responsiva para explorar suas coleções de jogos.
+Uma aplicação web moderna para visualizar bibliotecas de jogos Steam com **dashboard interativo de estatísticas**. Desenvolvida com Spring Boot no backend e HTML/CSS/JavaScript no frontend, oferece uma interface elegante e responsiva para explorar suas coleções de jogos com métricas detalhadas.
 
 ## ✨ Funcionalidades
 
+### 🎯 Biblioteca de Jogos
 - 🔍 **Busca por Steam ID**: Insira qualquer Steam ID válido para visualizar a biblioteca
-- 📊 **Estatísticas Detalhadas**: Total de jogos, horas jogadas e análises
 - 🎯 **Ordenação Inteligente**: Organize por nome ou tempo de jogo
 - 🖼️ **Ícones dos Jogos**: Visualização com imagens oficiais da Steam
-- 📱 **Design Responsivo**: Interface adaptada para desktop e mobile
 - ⚡ **Interface Moderna**: Design inspirado na Steam com animações suaves
+
+### 📊 Dashboard de Estatísticas *(Novo!)*
+- 📈 **Visão Geral**: Total de jogos, horas jogadas e média por jogo
+- 🏆 **Top 5 Mais Jogados**: Ranking com medalhas e tempo detalhado
+- ⭐ **Jogo Mais Recente**: Último jogo adicionado à biblioteca
+- 📊 **Estatísticas Avançadas**: Progresso de jogos jogados vs não jogados
+- 🎖️ **Sistema de Badges**: Conquistas automáticas (Colecionador, Maratonista)
+- 🎨 **Cards Interativos**: Interface moderna com animações e gradientes
+
+### 🌐 Recursos Gerais
+- 📱 **Design Responsivo**: Interface adaptada para desktop e mobile
 - 🔒 **Perfis Públicos**: Funciona apenas com perfis Steam públicos
+- ⚡ **Loading States**: Feedback visual durante carregamentos
+- 🎭 **Animações Suaves**: Transições e efeitos visuais
 
 ## 🛠️ Tecnologias Utilizadas
 
@@ -64,10 +76,10 @@ Uma aplicação web moderna para visualizar bibliotecas de jogos Steam. Desenvol
    ```
 
 3. **Execute via IntelliJ IDEA**
-    - Abra o projeto no IntelliJ
-    - Aguarde o Maven baixar as dependências
-    - Execute a classe `SteamGameViewerApplication.java`
-    - Ou use: `Run → Run 'SteamGameViewerApplication'`
+   - Abra o projeto no IntelliJ
+   - Aguarde o Maven baixar as dependências
+   - Execute a classe `SteamGameViewerApplication.java`
+   - Ou use: `Run → Run 'SteamGameViewerApplication'`
 
 4. **Execute via linha de comando**
    ```bash
@@ -75,9 +87,8 @@ Uma aplicação web moderna para visualizar bibliotecas de jogos Steam. Desenvol
    ```
 
 5. **Acesse a aplicação**
-    - Backend: http://localhost:8080
-    - Frontend: Abra `src/main/resources/static/index.html` no navegador
-    - API Test: http://localhost:8080/api/games/test
+   - Aplicação: http://localhost:8080
+   - API Test: http://localhost:8080/api/games/test
 
 ## 🔧 Configuração
 
@@ -113,20 +124,20 @@ steam-game-viewer/
 │   │   │   ├── config/
 │   │   │   │   └── CorsConfig.java                # Configuração CORS
 │   │   │   ├── controller/
-│   │   │   │   └── GameController.java            # API REST
+│   │   │   │   └── GameController.java            # API REST + Dashboard
 │   │   │   ├── model/
 │   │   │   │   ├── Game.java                      # Modelo do jogo
 │   │   │   │   └── SteamApiResponse.java          # Mapeamento da API Steam
 │   │   │   └── service/
-│   │   │       └── SteamService.java              # Lógica de negócio
+│   │   │       └── SteamService.java              # Lógica de negócio + Métricas
 │   │   └── resources/
 │   │       ├── static/                            # Frontend
-│   │       │   ├── index.html                     # Interface principal
+│   │       │   ├── index.html                     # Interface principal + Dashboard
 │   │       │   ├── scripts/
 │   │       │   │   ├── api.js                     # Comunicação com API
-│   │       │   │   └── main.js                    # Lógica do frontend
+│   │       │   │   └── main.js                    # Lógica do frontend + Dashboard
 │   │       │   └── styles/
-│   │       │       └── style.css                  # Estilos modernos
+│   │       │       └── style.css                  # Estilos modernos + Dashboard
 │   │       ├── application.properties             # Configurações gerais
 │   │       └── application-local.properties       # Configurações locais
 ├── pom.xml                                        # Dependências Maven
@@ -143,7 +154,11 @@ steam-game-viewer/
 - **GET** `/api/games/{steamId}?sortBy=name` - Ordenar por nome
 - **GET** `/api/games/{steamId}?sortBy=playtime` - Ordenar por tempo (padrão)
 
-### Exemplo de Resposta
+### Dashboard *(Novo!)*
+
+- **GET** `/api/games/{steamId}/dashboard` - Métricas agregadas da biblioteca
+
+### Exemplo de Resposta - Jogos
 
 ```json
 [
@@ -156,30 +171,74 @@ steam-game-viewer/
 ]
 ```
 
+### Exemplo de Resposta - Dashboard
+
+```json
+{
+  "total_games": 27,
+  "total_minutes": 4307,
+  "total_hours": 71.8,
+  "top5_most_played": [
+    {
+      "app_id": "730",
+      "name": "Counter-Strike 2",
+      "playtime_forever": 2170,
+      "img_icon_url": "https://...",
+      "playtime_hours": 36.17
+    }
+  ],
+  "most_recent_game": {
+    "app_id": "2767030",
+    "name": "Marvel Rivals",
+    "playtime_forever": 0,
+    "img_icon_url": "https://...",
+    "playtime_hours": 0.0
+  },
+  "generated_at": "2025-06-17T16:06:48.4723345"
+}
+```
+
 ## 🎯 Como Usar
 
 1. **Obtenha seu Steam ID**
-    - Visite [steamid.io](https://steamid.io/)
-    - Digite seu nome de usuário Steam
-    - Copie o "SteamID64" (17 dígitos)
+   - Visite [steamid.io](https://steamid.io/)
+   - Digite seu nome de usuário Steam
+   - Copie o "SteamID64" (17 dígitos)
 
 2. **Torne seu perfil público**
-    - Entre na Steam
-    - Vá em Perfil → Editar Perfil → Configurações de Privacidade
-    - Defina "Detalhes do jogo" como "Público"
+   - Entre na Steam
+   - Vá em Perfil → Editar Perfil → Configurações de Privacidade
+   - Defina "Detalhes do jogo" como "Público"
 
 3. **Use a aplicação**
-    - Cole seu Steam ID no campo
-    - Escolha a ordenação
-    - Clique em "Buscar Jogos"
+   - Cole seu Steam ID no campo
+   - Escolha a ordenação
+   - Clique em "Buscar Jogos"
+   - **Clique em "Ver Dashboard"** para visualizar estatísticas *(Novo!)*
 
-## 🛡️ Segurança
+## 📊 Métricas do Dashboard
 
-- ✅ Steam API Key protegida em arquivos de configuração
-- ✅ Validação de entrada nos formulários
-- ✅ Tratamento de erros robusto
-- ✅ CORS configurado adequadamente
-- ⚠️ **Nunca commite** `application-local.properties`
+### 📈 Visão Geral
+- **Total de Jogos**: Quantidade total na biblioteca
+- **Horas Totais**: Soma de todo tempo jogado (formatação inteligente)
+- **Média por Jogo**: Tempo médio por jogo (apenas jogos jogados)
+- **Status Visual**: Emoji baseado no perfil do usuário
+
+### 🏆 Top 5 Mais Jogados
+- **Ranking com Medalhas**: 🥇 🥈 🥉 para os 3 primeiros
+- **Ícones dos Jogos**: Imagens oficiais ou fallback personalizado
+- **Tempo Detalhado**: Formatação automática (minutos/horas)
+
+### ⭐ Jogo Mais Recente
+- **Detecção Automática**: Baseado no maior App ID
+- **Informações Completas**: Nome, ID, tempo jogado
+- **Destaque Visual**: Card especial com ícone grande
+
+### 📊 Estatísticas Avançadas
+- **Barra de Progresso**: % de jogos com tempo registrado vs nunca jogados
+- **Sistema de Badges**: Conquistas automáticas baseadas em métricas
+   - 🏆 **Colecionador**: 50+ jogos na biblioteca
+   - ⏰ **Maratonista**: 100+ horas totais jogadas
 
 ## 🎨 Características do Design
 
@@ -188,6 +247,17 @@ steam-game-viewer/
 - 📐 **Layout Responsivo**: Funciona em qualquer dispositivo
 - 🖼️ **Ícones Dinâmicos**: Fallback inteligente para jogos sem imagem
 - ⚡ **Loading States**: Feedback visual durante carregamentos
+- 🎨 **Cards Interativos**: Dashboard com hover effects e gradientes
+- 📊 **Barras Animadas**: Progresso visual das estatísticas
+
+## 🛡️ Segurança
+
+- ✅ Steam API Key protegida em arquivos de configuração
+- ✅ Validação de entrada nos formulários
+- ✅ Tratamento de erros robusto
+- ✅ CORS configurado adequadamente
+- ✅ Mapeamento automático de dados (snake_case ↔ camelCase)
+- ⚠️ **Nunca commite** `application-local.properties`
 
 ## 🔍 Troubleshooting
 
@@ -204,6 +274,11 @@ steam-game-viewer/
 **Erro: "Não foi possível conectar com a API"**
 - Verifique se o backend está rodando na porta 8080
 - Confirme se a Steam API Key está configurada
+
+**Dashboard mostra dados vazios**
+- Certifique-se que os jogos foram carregados primeiro
+- Verifique o console do navegador (F12) para erros
+- Teste o endpoint diretamente: `/api/games/{steamId}/dashboard`
 
 **Imagens não carregam**
 - Problema conhecido da Steam API
@@ -236,3 +311,5 @@ Sinta-se à vontade para contribuir com melhorias:
 ---
 
 **Desenvolvido com ❤️ e ☕ usando Spring Boot + HTML/CSS/JS**
+
+*Versão 1.1.0 - Dashboard Interativo com Métricas Agregadas*
