@@ -6,6 +6,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -64,6 +67,46 @@ public class GameController {
     }
 
     /**
+     * Endpoint para obter dashboard com dados agregados: GET /api/games/{steamId}/dashboard
+     *
+     * Retorna métricas consolidadas da biblioteca do usuário:
+     * - Total de jogos
+     * - Total de horas jogadas
+     * - Top 5 jogos mais jogados
+     * - Jogo mais recentemente adicionado
+     *
+     * @param steamId ID do usuário Steam
+     * @return Dashboard com estatísticas
+     */
+    @GetMapping("/{steamId}/dashboard")
+    public ResponseEntity<DashboardData> getUserDashboard(@PathVariable String steamId) {
+        try {
+            // Busca todos os jogos do usuário
+            List<Game> games = steamService.getUserGames(steamId);
+
+            if (games.isEmpty()) {
+                // Retorna dashboard vazio se não há jogos
+                DashboardData emptyDashboard = new DashboardData(
+                        0, 0, 0.0,
+                        new ArrayList<>(),
+                        null,
+                        LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)
+                );
+                return ResponseEntity.ok(emptyDashboard);
+            }
+
+            // Calcula métricas do dashboard
+            DashboardData dashboard = steamService.calculateDashboard(games);
+
+            return ResponseEntity.ok(dashboard);
+
+        } catch (Exception e) {
+            System.err.println("Erro ao gerar dashboard: " + e.getMessage());
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
+    /**
      * Endpoint de teste: GET /api/games/test
      * Útil para verificar se a API está funcionando
      */
@@ -97,6 +140,44 @@ public class GameController {
             default:
                 return steamService.sortByPlaytime(games);
         }
+    }
+
+    /**
+     * Classe para dados do dashboard
+     */
+    public static class DashboardData {
+        private int totalGames;
+        private int totalMinutes;
+        private double totalHours;
+        private List<Game> top5MostPlayed;
+        private Game mostRecentGame;
+        private String generatedAt;
+
+        public DashboardData(int totalGames, int totalMinutes, double totalHours,
+                             List<Game> top5MostPlayed, Game mostRecentGame, String generatedAt) {
+            this.totalGames = totalGames;
+            this.totalMinutes = totalMinutes;
+            this.totalHours = totalHours;
+            this.top5MostPlayed = top5MostPlayed;
+            this.mostRecentGame = mostRecentGame;
+            this.generatedAt = generatedAt;
+        }
+
+        // Getters
+        public int getTotalGames() { return totalGames; }
+        public int getTotalMinutes() { return totalMinutes; }
+        public double getTotalHours() { return totalHours; }
+        public List<Game> getTop5MostPlayed() { return top5MostPlayed; }
+        public Game getMostRecentGame() { return mostRecentGame; }
+        public String getGeneratedAt() { return generatedAt; }
+
+        // Setters
+        public void setTotalGames(int totalGames) { this.totalGames = totalGames; }
+        public void setTotalMinutes(int totalMinutes) { this.totalMinutes = totalMinutes; }
+        public void setTotalHours(double totalHours) { this.totalHours = totalHours; }
+        public void setTop5MostPlayed(List<Game> top5MostPlayed) { this.top5MostPlayed = top5MostPlayed; }
+        public void setMostRecentGame(Game mostRecentGame) { this.mostRecentGame = mostRecentGame; }
+        public void setGeneratedAt(String generatedAt) { this.generatedAt = generatedAt; }
     }
 
     /**

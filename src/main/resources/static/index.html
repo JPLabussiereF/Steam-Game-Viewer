@@ -116,13 +116,124 @@
                     <i class="fas fa-trophy"></i>
                     Biblioteca de Jogos
                 </h2>
-                <div class="results-stats">
-                    <span id="gameCount" class="game-count">0 jogos encontrados</span>
-                    <span id="totalHours" class="total-hours">0h total</span>
+                <div class="results-info">
+                    <div class="results-stats">
+                        <span id="gameCount" class="game-count">0 jogos encontrados</span>
+                        <span id="totalHours" class="total-hours">0h total</span>
+                    </div>
+                    <div class="dashboard-actions">
+                        <button type="button" id="dashboardBtn" class="dashboard-btn" style="display: none;">
+                            <i class="fas fa-chart-bar"></i>
+                            <span>Ver Dashboard</span>
+                            <div class="loading-spinner"></div>
+                        </button>
+                    </div>
                 </div>
             </div>
 
             <div id="gamesList" class="games-grid"></div>
+        </section>
+
+        <!-- Dashboard Section -->
+        <section id="dashboardSection" class="dashboard-section" style="display: none;">
+            <div class="dashboard-header">
+                <h2>
+                    <i class="fas fa-chart-bar"></i>
+                    Dashboard da Biblioteca
+                </h2>
+                <button type="button" id="closeDashboardBtn" class="close-dashboard-btn">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <div class="dashboard-grid">
+                <!-- Card: Visão Geral -->
+                <div class="dashboard-card overview-card">
+                    <div class="card-header">
+                        <h3><i class="fas fa-gamepad"></i> Visão Geral</h3>
+                    </div>
+                    <div class="card-content">
+                        <div class="stat-row">
+                            <div class="stat-item">
+                                <div class="stat-value" id="dashTotalGames">0</div>
+                                <div class="stat-label">Total de Jogos</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-value" id="dashTotalHours">0h</div>
+                                <div class="stat-label">Horas Totais</div>
+                            </div>
+                        </div>
+                        <div class="stat-row">
+                            <div class="stat-item">
+                                <div class="stat-value" id="dashAverageHours">0h</div>
+                                <div class="stat-label">Média por Jogo</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-badge" id="dashStatus">📊</div>
+                                <div class="stat-label">Status</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card: Top 5 Jogos -->
+                <div class="dashboard-card top-games-card">
+                    <div class="card-header">
+                        <h3><i class="fas fa-trophy"></i> Top 5 Mais Jogados</h3>
+                    </div>
+                    <div class="card-content">
+                        <div id="topGamesList" class="top-games-list">
+                            <!-- Será preenchido dinamicamente -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card: Jogo Mais Recente -->
+                <div class="dashboard-card recent-game-card">
+                    <div class="card-header">
+                        <h3><i class="fas fa-star"></i> Mais Recente</h3>
+                    </div>
+                    <div class="card-content">
+                        <div id="recentGameContent" class="recent-game-content">
+                            <!-- Será preenchido dinamicamente -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card: Estatísticas Extras -->
+                <div class="dashboard-card stats-card">
+                    <div class="card-header">
+                        <h3><i class="fas fa-chart-line"></i> Estatísticas</h3>
+                    </div>
+                    <div class="card-content">
+                        <div class="progress-stat">
+                            <div class="progress-label">Jogos com tempo registrado</div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" id="playedGamesProgress" style="width: 0%"></div>
+                            </div>
+                            <div class="progress-text" id="playedGamesText">0 de 0 jogos</div>
+                        </div>
+
+                        <div class="achievement-badges">
+                            <div class="badge" id="collectorBadge">
+                                <i class="fas fa-trophy"></i>
+                                <span>Colecionador</span>
+                            </div>
+                            <div class="badge" id="marathonBadge">
+                                <i class="fas fa-clock"></i>
+                                <span>Maratonista</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="dashboard-footer">
+                <small id="dashboardTimestamp">
+                    <i class="fas fa-clock"></i>
+                    Dados gerados em: --
+                </small>
+            </div>
         </section>
     </div>
 </main>

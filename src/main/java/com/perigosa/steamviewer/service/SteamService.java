@@ -2,14 +2,19 @@ package com.perigosa.steamviewer.service;
 
 import com.perigosa.steamviewer.model.Game;
 import com.perigosa.steamviewer.model.SteamApiResponse;
+import com.perigosa.steamviewer.controller.GameController.DashboardData;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.client.RestClientException;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -64,6 +69,136 @@ public class SteamService {
             System.err.println("Erro ao buscar jogos do Steam: " + e.getMessage());
             return new ArrayList<>();
         }
+    }
+
+    /**
+     * Calcula todas as métricas para o dashboard
+     * @param games Lista de jogos do usuário
+     * @return Dados consolidados do dashboard
+     */
+    public DashboardData calculateDashboard(List<Game> games) {
+        if (games == null || games.isEmpty()) {
+            return new DashboardData(0, 0, 0.0, new ArrayList<>(), null,
+                    LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
+        }
+
+        // 1. Total de jogos
+        int totalGames = games.size();
+
+        // 2. Total de minutos/horas jogados
+        int totalMinutes = games.stream()
+                .mapToInt(Game::getPlaytimeForever)
+                .sum();
+        double totalHours = Math.round(totalMinutes / 60.0 * 10) / 10.0;
+
+        // 3. Top 5 jogos mais jogados
+        List<Game> top5MostPlayed = games.stream()
+                .filter(game -> game.getPlaytimeForever() > 0) // Apenas jogos com tempo de jogo
+                .sorted(Comparator.comparingInt(Game::getPlaytimeForever).reversed())
+                .limit(5)
+                .collect(Collectors.toList());
+
+        // 4. Jogo mais recentemente adicionado (usando appId como aproximação)
+        // Como a Steam API não retorna data de adição, usamos o maior appId como proxy
+        Game mostRecentGame = games.stream()
+                .max(Comparator.comparing(game -> Long.parseLong(game.getAppId())))
+                .orElse(null);
+
+        // 5. Timestamp de geração
+        String generatedAt = LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+
+        return new DashboardData(totalGames, totalMinutes, totalHours,
+                top5MostPlayed, mostRecentGame, generatedAt);
+    }
+
+    /**
+     * Obtém estatísticas detalhadas dos jogos (método auxiliar)
+     * @param games Lista de jogos
+     * @return Mapa com estatísticas detalhadas
+     */
+    public Map<String, Object> getDetailedStats(List<Game> games) {
+        Map<String, Object> stats = new HashMap<>();
+
+        if (games == null || games.isEmpty()) {
+            stats.put("totalGames", 0);
+            stats.put("gamesWithPlaytime", 0);
+            stats.put("gamesNeverPlayed", 0);
+            stats.put("averagePlaytime", 0.0);
+            stats.put("longestSession", null);
+            return stats;
+        }
+
+        // Jogos com tempo de jogo
+        List<Game> playedGames = games.stream()
+                .filter(game -> game.getPlaytimeForever() > 0)
+                .collect(Collectors.toList());
+
+        // Jogos nunca jogados
+        int neverPlayed = games.size() - playedGames.size();
+
+        // Tempo médio de jogo (apenas jogos jogados)
+        double averagePlaytime = playedGames.stream()
+                .mapToInt(Game::getPlaytimeForever)
+                .average()
+                .orElse(0.0);
+        averagePlaytime = Math.round(averagePlaytime / 60.0 * 10) / 10.0; // Converter para horas
+
+        // Jogo com mais horas
+        Game longestSession = playedGames.stream()
+                .max(Comparator.comparingInt(Game::getPlaytimeForever))
+                .orElse(null);
+
+        stats.put("totalGames", games.size());
+        stats.put("gamesWithPlaytime", playedGames.size());
+        stats.put("gamesNeverPlayed", neverPlayed);
+        stats.put("averagePlaytime", averagePlaytime);
+        stats.put("longestSession", longestSession);
+
+        return stats;
+    }
+
+    /**
+     * Obtém jogos por categorias de tempo de jogo
+     * @param games Lista de jogos
+     * @return Mapa com jogos categorizados por tempo
+     */
+    public Map<String, List<Game>> categorizeGamesByPlaytime(List<Game> games) {
+        Map<String, List<Game>> categories = new HashMap<>();
+
+        if (games == null || games.isEmpty()) {
+            categories.put("neverPlayed", new ArrayList<>());
+            categories.put("casual", new ArrayList<>());
+            categories.put("regular", new ArrayList<>());
+            categories.put("hardcore", new ArrayList<>());
+            return categories;
+        }
+
+        // Categorizar jogos por tempo de jogo
+        List<Game> neverPlayed = new ArrayList<>();    // 0 minutos
+        List<Game> casual = new ArrayList<>();         // 1-180 minutos (1-3h)
+        List<Game> regular = new ArrayList<>();        // 181-1200 minutos (3-20h)
+        List<Game> hardcore = new ArrayList<>();       // >1200 minutos (>20h)
+
+        for (Game game : games) {
+            int playtime = game.getPlaytimeForever();
+
+            if (playtime == 0) {
+                neverPlayed.add(game);
+            } else if (playtime <= 180) {
+                casual.add(game);
+            } else if (playtime <= 1200) {
+                regular.add(game);
+            } else {
+                hardcore.add(game);
+            }
+        }
+
+        categories.put("neverPlayed", neverPlayed);
+        categories.put("casual", casual);
+        categories.put("regular", regular);
+        categories.put("hardcore", hardcore);
+
+        return categories;
     }
 
     /**
